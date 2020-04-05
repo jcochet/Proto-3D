@@ -21,7 +21,7 @@ public class PlayerMovement: MonoBehaviour
     public Animator anim;
 
     // Character's movement speed
-    [SerializeField] private float speed = 5.0f;
+    [SerializeField] private float speed = 6.0f;
     // Character's speed of rotation
     [SerializeField] private float rotationSpeed = 0.1f;
     // Character's height of jump

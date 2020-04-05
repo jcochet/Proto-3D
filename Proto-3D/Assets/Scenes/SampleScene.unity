@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 69118931}
   - component: {fileID: 69118930}
   m_Layer: 4
-  m_Name: Plane
+  m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198,7 +198,7 @@ MeshCollider:
   m_GameObject: {fileID: 69118929}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
@@ -1022,7 +1022,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 93801331}
-  m_LocalRotation: {x: 0.1347682, y: -0.000000024715458, z: 0.000000044160718, w: 0.99087715}
+  m_LocalRotation: {x: 0.1347682, y: 0.000000013408179, z: 0.00000003897556, w: 0.99087715}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -1957,7 +1957,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   anim: {fileID: 1995577785}
-  speed: 5
+  speed: 6
   rotationSpeed: 0.1
   jumpHeight: 1
   gravity: 9.81
@@ -3543,7 +3543,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
-  m_LocalRotation: {x: 0.15272196, y: 1.3166392e-15, z: -2.0346654e-16, w: 0.9882692}
+  m_LocalRotation: {x: 0.15272194, y: -1.3166393e-15, z: 2.0346654e-16, w: 0.9882692}
   m_LocalPosition: {x: 20, y: 3.9996696, z: -53.89906}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -22318,7 +22318,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1605263429}
-  m_LocalRotation: {x: 0.15272199, y: -0.0000000024821543, z: 0.000000016062112, w: 0.9882692}
+  m_LocalRotation: {x: 0.15272197, y: -0.0000000024821558, z: 0.000000016062112, w: 0.9882692}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
