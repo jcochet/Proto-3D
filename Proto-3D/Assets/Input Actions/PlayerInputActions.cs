@@ -180,6 +180,74 @@ public class @PlayerInputActions : IInputActionCollection, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Camera Controls"",
+            ""id"": ""36441233-64c6-4ec8-803b-7d12c694db9e"",
+            ""actions"": [
+                {
+                    ""name"": ""FirstPerson"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""f1e2b3e9-3c6c-496c-9c18-efea51fa420f"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """"
+                },
+                {
+                    ""name"": ""SwitchCamera"",
+                    ""type"": ""Button"",
+                    ""id"": ""2b1e37c5-7336-431c-9f45-25631cb74e3f"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """"
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""43edbdd4-576f-4ba8-88da-062c57207d23"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": ""ScaleVector2(x=0.05,y=0.05)"",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""FirstPerson"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ebddc418-e93e-414a-a09a-b7e70c1b2b78"",
+                    ""path"": ""<Gamepad>/rightStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""FirstPerson"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7b17e146-df8a-4241-a1b6-0bbe76fa70a1"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard"",
+                    ""action"": ""SwitchCamera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1e52384c-61ab-4b6b-8a7d-06d0f9ce1ff2"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""SwitchCamera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": [
@@ -211,6 +279,10 @@ public class @PlayerInputActions : IInputActionCollection, IDisposable
         m_PlayerControls = asset.FindActionMap("Player Controls", throwIfNotFound: true);
         m_PlayerControls_Move = m_PlayerControls.FindAction("Move", throwIfNotFound: true);
         m_PlayerControls_Jump = m_PlayerControls.FindAction("Jump", throwIfNotFound: true);
+        // Camera Controls
+        m_CameraControls = asset.FindActionMap("Camera Controls", throwIfNotFound: true);
+        m_CameraControls_FirstPerson = m_CameraControls.FindAction("FirstPerson", throwIfNotFound: true);
+        m_CameraControls_SwitchCamera = m_CameraControls.FindAction("SwitchCamera", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -297,6 +369,47 @@ public class @PlayerInputActions : IInputActionCollection, IDisposable
         }
     }
     public PlayerControlsActions @PlayerControls => new PlayerControlsActions(this);
+
+    // Camera Controls
+    private readonly InputActionMap m_CameraControls;
+    private ICameraControlsActions m_CameraControlsActionsCallbackInterface;
+    private readonly InputAction m_CameraControls_FirstPerson;
+    private readonly InputAction m_CameraControls_SwitchCamera;
+    public struct CameraControlsActions
+    {
+        private @PlayerInputActions m_Wrapper;
+        public CameraControlsActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @FirstPerson => m_Wrapper.m_CameraControls_FirstPerson;
+        public InputAction @SwitchCamera => m_Wrapper.m_CameraControls_SwitchCamera;
+        public InputActionMap Get() { return m_Wrapper.m_CameraControls; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(CameraControlsActions set) { return set.Get(); }
+        public void SetCallbacks(ICameraControlsActions instance)
+        {
+            if (m_Wrapper.m_CameraControlsActionsCallbackInterface != null)
+            {
+                @FirstPerson.started -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnFirstPerson;
+                @FirstPerson.performed -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnFirstPerson;
+                @FirstPerson.canceled -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnFirstPerson;
+                @SwitchCamera.started -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnSwitchCamera;
+                @SwitchCamera.performed -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnSwitchCamera;
+                @SwitchCamera.canceled -= m_Wrapper.m_CameraControlsActionsCallbackInterface.OnSwitchCamera;
+            }
+            m_Wrapper.m_CameraControlsActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @FirstPerson.started += instance.OnFirstPerson;
+                @FirstPerson.performed += instance.OnFirstPerson;
+                @FirstPerson.canceled += instance.OnFirstPerson;
+                @SwitchCamera.started += instance.OnSwitchCamera;
+                @SwitchCamera.performed += instance.OnSwitchCamera;
+                @SwitchCamera.canceled += instance.OnSwitchCamera;
+            }
+        }
+    }
+    public CameraControlsActions @CameraControls => new CameraControlsActions(this);
     private int m_KeyboardSchemeIndex = -1;
     public InputControlScheme KeyboardScheme
     {
@@ -319,5 +432,10 @@ public class @PlayerInputActions : IInputActionCollection, IDisposable
     {
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
+    }
+    public interface ICameraControlsActions
+    {
+        void OnFirstPerson(InputAction.CallbackContext context);
+        void OnSwitchCamera(InputAction.CallbackContext context);
     }
 }

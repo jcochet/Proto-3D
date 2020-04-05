@@ -5,10 +5,11 @@ using UnityEngine;
 /**
  *  Moves the attached GameObject according to the player's inputs
  *  @required   CharacterController Component
+ *  @required   PlayerCamera
  *  @required   Child with Animator Controller Component (3 parameters : "vSpeed", "jump", "grounded")
  *  @author     Julien "pimkeomi" Cochet
  */
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterController), typeof(PlayerCamera))]
 public class PlayerMovement: MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------------
@@ -19,6 +20,8 @@ public class PlayerMovement: MonoBehaviour
 
     // Child's Animator Controller
     public Animator anim;
+    // Gravity
+    public float gravity = 9.81f;
 
     // Character's movement speed
     [SerializeField] private float speed = 6.0f;
@@ -26,8 +29,6 @@ public class PlayerMovement: MonoBehaviour
     [SerializeField] private float rotationSpeed = 0.1f;
     // Character's height of jump
     [SerializeField] private float jumpHeight = 1.0f;
-    // Gravity
-    [SerializeField] private float gravity = 9.81f;
 
 
     // InputActions
@@ -36,10 +37,12 @@ public class PlayerMovement: MonoBehaviour
     private CharacterController controller;
     // Transform component of themain camera
     private Transform camTrans;
+    // Player's input
+    private Vector2 movementInput = Vector2.zero;
     // Character's movement
-    private Vector2 movementInput;
+    private Vector3 move = Vector3.zero;
     // Character's velocity
-    private Vector3 velocity;
+    private Vector3 velocity = Vector3.zero;
 
 
     //----------------------------------------------------------------------------------------------------
@@ -76,26 +79,32 @@ public class PlayerMovement: MonoBehaviour
             this.velocity.y = -2;
         }
 
-        // Forward according to the camera's view
-        Vector3 forward = this.camTrans.forward;
-        // Right according to the camera's view
-        Vector3 right = this.camTrans.right;
-
-        forward.y = 0.0f;
-        forward.Normalize();
-        right.y = 0.0f;
-        right.Normalize();
-
-        Vector3 move = ((forward * this.movementInput.y) + (right * this.movementInput.x));
-
-        // Rotation
-        if (move != Vector3.zero)
+        if (this.gameObject.GetComponent<PlayerCamera>().thirdPersonView)
         {
-            this.transform.rotation = Quaternion.Slerp(this.transform.rotation, Quaternion.LookRotation(move), this.rotationSpeed);
+            // Forward according to the camera's view
+            Vector3 forward = this.camTrans.forward;
+            // Right according to the camera's view
+            Vector3 right = this.camTrans.right;
+
+            forward.y = 0.0f;
+            forward.Normalize();
+            right.y = 0.0f;
+            right.Normalize();
+
+            this.move = ((forward * this.movementInput.y) + (right * this.movementInput.x));
+
+            // Rotation
+            if (this.move != Vector3.zero)
+            {
+                this.transform.rotation = Quaternion.Slerp(this.transform.rotation, Quaternion.LookRotation(this.move), this.rotationSpeed);
+            }
+        } else
+        {
+            this.move = ((this.transform.forward * this.movementInput.y) + (this.transform.right * this.movementInput.x));
         }
 
         // Movement
-        this.controller.Move(move * this.speed * Time.deltaTime);
+        this.controller.Move(this.move * this.speed * Time.deltaTime);
         
         // Gravity
         this.velocity.y -= this.gravity * Time.deltaTime;
@@ -105,7 +114,7 @@ public class PlayerMovement: MonoBehaviour
     // Mades the attached GameObject move
     private void Jump()
     {
-        if(this.controller.isGrounded)
+        if (this.controller.isGrounded)
         {
             this.velocity.y = Mathf.Sqrt(this.jumpHeight * 2.0f * this.gravity);
             this.anim.SetTrigger("jump");
@@ -150,9 +159,9 @@ public class PlayerMovement: MonoBehaviour
         return this.rotationSpeed;
     }
 
-    public float GetGravity()
+    public Vector2 GetMovementInput()
     {
-        return this.gravity;
+        return this.movementInput;
     }
 
 
@@ -170,10 +179,5 @@ public class PlayerMovement: MonoBehaviour
     public void SetRotationSpeed(float rotationSpeed)
     {
         this.rotationSpeed = rotationSpeed >= 0.0f ? rotationSpeed : 0.0f;
-    }
-
-    public void SetGravity(float gravity)
-    {
-        this.gravity = gravity;
     }
 }
