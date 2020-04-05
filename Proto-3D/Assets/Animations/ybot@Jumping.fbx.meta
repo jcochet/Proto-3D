@@ -15,7 +15,17 @@ ModelImporter:
   - first:
       74: -2630987167097312311
     second: Landing
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Body_MAT
+    second: {fileID: 2100000, guid: 7def32aa3abd8e441828634dbdd64370, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Joints_MAT
+    second: {fileID: 2100000, guid: 1ae4cbedfee2ee54e8f39f5adae4488f, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0

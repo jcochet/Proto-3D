@@ -6,7 +6,17 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: Male Dynamic Pose
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Body_MAT
+    second: {fileID: 2100000, guid: 95ee15a269046074488296ee8df2c07a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Alpha_Joints_MAT
+    second: {fileID: 2100000, guid: ad61fb3d47024524b8d8365010d8cbba, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
