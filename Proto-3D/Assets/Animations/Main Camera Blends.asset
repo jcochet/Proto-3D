@@ -16,7 +16,7 @@ MonoBehaviour:
   - m_From: CM_FirstPerson
     m_To: CM_ThirdPerson
     m_Blend:
-      m_Style: 1
+      m_Style: 5
       m_Time: 1
       m_CustomCurve:
         serializedVersion: 2
@@ -27,7 +27,7 @@ MonoBehaviour:
   - m_From: CM_ThirdPerson
     m_To: CM_FirstPerson
     m_Blend:
-      m_Style: 1
+      m_Style: 5
       m_Time: 1
       m_CustomCurve:
         serializedVersion: 2

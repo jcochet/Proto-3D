@@ -41,6 +41,8 @@ public class PlayerMovement: MonoBehaviour
     private Vector2 movementInput = Vector2.zero;
     // Character's movement
     private Vector3 move = Vector3.zero;
+    // Character's vertical speed 
+    float vSpeed = 0.0f;
     // Character's velocity
     private Vector3 velocity = Vector3.zero;
 
@@ -124,8 +126,8 @@ public class PlayerMovement: MonoBehaviour
     // Animates the character
     private void Animate(float xInput, float zInput)
     {
-        float vSpeed = new Vector2(xInput, zInput).sqrMagnitude;
-        this.anim.SetFloat("vSpeed", vSpeed);
+        this.vSpeed = new Vector2(xInput, zInput).sqrMagnitude;
+        this.anim.SetFloat("vSpeed", this.vSpeed);
 
         this.anim.SetBool("grounded", this.controller.isGrounded);
     }
@@ -159,9 +161,9 @@ public class PlayerMovement: MonoBehaviour
         return this.rotationSpeed;
     }
 
-    public Vector2 GetMovementInput()
+    public float GetVSpeed()
     {
-        return this.movementInput;
+        return this.vSpeed;
     }
 
 

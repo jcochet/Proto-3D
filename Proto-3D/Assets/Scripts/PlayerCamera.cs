@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 /**
  *  Manages the cameras connected to the character
+ *  @required   PlayerMovement for camera shaking
  *  @author     Julien "pimkeomi" Cochet
  */
+[RequireComponent(typeof(PlayerMovement))]
 public class PlayerCamera : MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------------
@@ -20,6 +23,14 @@ public class PlayerCamera : MonoBehaviour
     public Cinemachine.CinemachineVirtualCamera firstPersonCam;
     // Camera for third person view
     public Cinemachine.CinemachineFreeLook thirdPersonCam;
+    // Maximum amplitude for the noise on the first person camera
+    public float FPNoiseAmplitudeMax = 0.75f;
+    // Maximum frequency for the noise on the first person camera
+    public float FPNoiseFrequencyMax = 3.0f;
+    // Maximum amplitude for the noise on the third person camera
+    public float TPNoiseAmplitudeMax = 0.0f;
+    // Maximum frequency for the noise on the third person camera
+    public float TPNoiseFrequencyMax = 0.0f;
 
     // Mouse or joystick sensitivity
     [SerializeField] private float sensitivity = 200.0f;
@@ -68,6 +79,7 @@ public class PlayerCamera : MonoBehaviour
         {
             this.Rotate();
         }
+        this.Shake();
     }
 
     // Rotates the character and the camera on first person view
@@ -81,6 +93,30 @@ public class PlayerCamera : MonoBehaviour
 
         this.firstPersonCam.transform.localRotation = Quaternion.Euler(this.xRotation, 0.0f, 0.0f);
         this.transform.Rotate(Vector3.up * inputX);
+    }
+
+    // Shake the camera according to vSpeed
+    private void Shake()
+    {
+        float vSpeed = this.gameObject.GetComponent<PlayerMovement>().GetVSpeed();
+        if (this.thirdPersonView == false)
+        {
+            this.firstPersonCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = vSpeed * this.FPNoiseAmplitudeMax;
+            this.firstPersonCam.GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = vSpeed * this.FPNoiseFrequencyMax;
+        } else
+        {
+            // Top rig
+            this.thirdPersonCam.GetRig(0).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = vSpeed * this.TPNoiseAmplitudeMax;
+            this.thirdPersonCam.GetRig(0).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = vSpeed * this.TPNoiseFrequencyMax;
+
+            // Middle rig
+            this.thirdPersonCam.GetRig(1).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = vSpeed * this.TPNoiseAmplitudeMax;
+            this.thirdPersonCam.GetRig(1).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = vSpeed * this.TPNoiseFrequencyMax;
+
+            // Bottom rig
+            this.thirdPersonCam.GetRig(2).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_AmplitudeGain = vSpeed * this.TPNoiseAmplitudeMax;
+            this.thirdPersonCam.GetRig(2).GetCinemachineComponent<CinemachineBasicMultiChannelPerlin>().m_FrequencyGain = vSpeed * this.TPNoiseFrequencyMax;
+        }
     }
 
     // Change the view for first or third person
@@ -98,16 +134,24 @@ public class PlayerCamera : MonoBehaviour
     // Switch to first person view
     private void SwitchToFPV()
     {
+        this.transform.localRotation = Quaternion.Euler(0.0f, this.thirdPersonCam.m_XAxis.Value, 0.0f);
+        this.xRotation = (this.thirdPersonCam.m_YAxis.Value * 180.0f) - 90.0f;
+
         this.firstPersonCam.Priority = 10;
         this.thirdPersonCam.Priority = 9;
+
         this.thirdPersonView = false;
     }
 
     // Switch to third person view
     private void SwitchToTPV()
     {
+        this.thirdPersonCam.m_XAxis.Value = Camera.main.transform.eulerAngles.y;
+        this.thirdPersonCam.m_YAxis.Value = (this.xRotation + 90.0f) / 180.0f;
+
         this.thirdPersonCam.Priority = 10;
         this.firstPersonCam.Priority = 9;
+
         this.thirdPersonView = true;
     }
 
