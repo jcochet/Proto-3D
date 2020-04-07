@@ -1,16 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /**
  *  Moves the attached GameObject according to the player's inputs
+ *  @required   PlayerInput Component
  *  @required   CharacterController Component
- *  @required   PlayerCamera
+ *  @required   CharacterCamera Component
  *  @required   Child with Animator Controller Component (3 parameters : "vSpeed", "jump", "grounded")
+ *  @required   Camera for this character
  *  @author     Julien "pimkeomi" Cochet
  */
-[RequireComponent(typeof(CharacterController), typeof(PlayerCamera))]
-public class PlayerMovement: MonoBehaviour
+[RequireComponent(typeof(PlayerInput), typeof(CharacterController), typeof(CharacterCamera))]
+public class CharacterMovement : MonoBehaviour
 {
     //----------------------------------------------------------------------------------------------------
     /*
@@ -29,20 +32,15 @@ public class PlayerMovement: MonoBehaviour
     [SerializeField] private float rotationSpeed = 0.1f;
     // Character's height of jump
     [SerializeField] private float jumpHeight = 1.0f;
-
-
-    // InputActions
-    private PlayerInputActions inputAction;
+    
     // CharacterController Component of the attached GameObject
     private CharacterController controller;
-    // Transform component of themain camera
-    private Transform camTrans;
     // Player's input
     private Vector2 movementInput = Vector2.zero;
     // Character's movement
     private Vector3 move = Vector3.zero;
-    // Character's vertical speed 
-    float vSpeed = 0.0f;
+    // Character's horizontal speed 
+    private float hSpeed = 0.0f;
     // Character's velocity
     private Vector3 velocity = Vector3.zero;
 
@@ -56,13 +54,7 @@ public class PlayerMovement: MonoBehaviour
     // Awake is used to initialize any variables or game state before the game starts
     private void Awake()
     {
-        this.inputAction = new PlayerInputActions();
-        this.inputAction.PlayerControls.Move.performed += ctx => this.movementInput = ctx.ReadValue<Vector2>();
-        this.inputAction.PlayerControls.Jump.performed += _ => this.Jump();
-
         this.controller = this.gameObject.GetComponent<CharacterController>();
-
-        this.camTrans = Camera.main.transform;
     }
 
     // Update is called once per frame
@@ -70,29 +62,32 @@ public class PlayerMovement: MonoBehaviour
     {
         this.Move();
     }
-    
+
     // Mades the attached GameObject move
     private void Move()
     {
+        // Animation
         this.Animate(this.movementInput.x, this.movementInput.y);
 
+        // Gravity 
         if (this.controller.isGrounded && this.velocity.y < 0)
         {
             this.velocity.y = -2;
         }
 
-        if (this.gameObject.GetComponent<PlayerCamera>().thirdPersonView)
+        if (this.gameObject.GetComponent<CharacterCamera>().thirdPersonView)
         {
             // Forward according to the camera's view
-            Vector3 forward = this.camTrans.forward;
+            Vector3 forward = this.gameObject.GetComponent<CharacterCamera>().camTrans.forward;
             // Right according to the camera's view
-            Vector3 right = this.camTrans.right;
+            Vector3 right = this.gameObject.GetComponent<CharacterCamera>().camTrans.right;
 
             forward.y = 0.0f;
             forward.Normalize();
             right.y = 0.0f;
             right.Normalize();
 
+            // Third person view's move
             this.move = ((forward * this.movementInput.y) + (right * this.movementInput.x));
 
             // Rotation
@@ -102,19 +97,26 @@ public class PlayerMovement: MonoBehaviour
             }
         } else
         {
+            // First person view's move
             this.move = ((this.transform.forward * this.movementInput.y) + (this.transform.right * this.movementInput.x));
         }
 
         // Movement
         this.controller.Move(this.move * this.speed * Time.deltaTime);
-        
+
         // Gravity
         this.velocity.y -= this.gravity * Time.deltaTime;
         this.controller.Move(this.velocity * Time.deltaTime);
     }
-    
+
+    // Read the player's input for horizontal movements
+    private void OnHorizontalMove(InputValue value)
+    {
+        this.movementInput = value.Get<Vector2>();
+    }
+
     // Mades the attached GameObject move
-    private void Jump()
+    private void OnJump()
     {
         if (this.controller.isGrounded)
         {
@@ -126,22 +128,10 @@ public class PlayerMovement: MonoBehaviour
     // Animates the character
     private void Animate(float xInput, float zInput)
     {
-        this.vSpeed = new Vector2(xInput, zInput).sqrMagnitude;
-        this.anim.SetFloat("vSpeed", this.vSpeed);
+        this.hSpeed = new Vector2(xInput, zInput).sqrMagnitude;
+        this.anim.SetFloat("hSpeed", this.hSpeed);
 
         this.anim.SetBool("grounded", this.controller.isGrounded);
-    }
-
-    // OnEnable is called when the attached GameObject is enable and active
-    private void OnEnable()
-    {
-        this.inputAction.Enable();
-    }
-
-    // OnEnable is called when the attached GameObject is disable or inactive
-    private void OnDisable()
-    {
-        this.inputAction.Disable();
     }
 
 
@@ -155,15 +145,15 @@ public class PlayerMovement: MonoBehaviour
     {
         return this.speed;
     }
-    
+
     public float GetRotationSpeed()
     {
         return this.rotationSpeed;
     }
 
-    public float GetVSpeed()
+    public float GetHSpeed()
     {
-        return this.vSpeed;
+        return this.hSpeed;
     }
 
 
@@ -177,9 +167,11 @@ public class PlayerMovement: MonoBehaviour
     {
         this.speed = speed >= 0.0f ? speed : 0.0f;
     }
-    
+
     public void SetRotationSpeed(float rotationSpeed)
     {
         this.rotationSpeed = rotationSpeed >= 0.0f ? rotationSpeed : 0.0f;
     }
+
+
 }
